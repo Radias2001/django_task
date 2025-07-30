@@ -32,14 +32,24 @@ class MenuItem(models.Model):
 
     def clean(self):
         super().clean()
+
         if self.parent:
             if self.parent == self:
                 raise ValidationError("Элемент не может быть родителем сам себе.")
+
             ancestor = self.parent
             while ancestor:
                 if ancestor == self:
                     raise ValidationError("Обнаружено зацикливание в структуре меню.")
                 ancestor = ancestor.parent
+
+        if self.url and self.named_url:
+            raise ValidationError("Укажите либо 'URL', либо 'Named URL', но не и то и то.")
+
+        if not self.url and not self.named_url:
+            raise ValidationError("Нужно указать либо 'URL', либо 'Named URL'.")
+
+
 
     def __str__(self):
         return self.title
